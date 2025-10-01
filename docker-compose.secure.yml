@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  linkedin-mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: linkedin-mcp-server
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      # SECURITY: Never hardcode secrets! Read from environment variable
+      # Set DOTENV_PRIVATE_KEY in your shell environment or .env.local (not committed to git)
+      - DOTENV_PRIVATE_KEY=${DOTENV_PRIVATE_KEY}
+    # Load additional secrets from a file not committed to version control
+    env_file:
+      - .env.local  # This file should be in .gitignore
+    volumes:
+      # Mount encrypted .env file as read-only
+      - ./.env:/app/.env:ro
+    networks:
+      - mcp-network
+    # For MCP, we typically use stdio, but if needed for debugging:
+    # ports:
+    #   - "5050:5050"
+
+    # Enhanced health check
+    healthcheck:
+      test: ["CMD", "node", "-e", "process.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  mcp-network:
+    driver: bridge
+
+# PRODUCTION EXAMPLE: Using Docker Secrets (Swarm/Kubernetes)
+# Uncomment for production deployments with Docker Swarm or Kubernetes
+#
+# services:
+#   linkedin-mcp-server:
+#     secrets:
+#       - dotenv_private_key
+#       - linkedin_client_secret
+#     environment:
+#       - NODE_ENV=production
+#       - DOTENV_PRIVATE_KEY_FILE=/run/secrets/dotenv_private_key
+#       - LINKEDIN_CLIENT_SECRET_FILE=/run/secrets/linkedin_client_secret
+#
+# secrets:
+#   dotenv_private_key:
+#     external: true
+#   linkedin_client_secret:
+#     external: true
