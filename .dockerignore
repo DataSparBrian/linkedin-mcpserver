@@ -8,6 +8,8 @@ build
 # Environment files (will be handled by dotenvx)
 .env.local
 .env.*.local
+.env.example
+.env.local.example
 
 # Git
 .git
