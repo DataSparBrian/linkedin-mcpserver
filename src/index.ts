@@ -1,10 +1,11 @@
 import 'reflect-metadata'
 // ensure reflect-metadata is loaded before any other imports
+import '@dotenvx/dotenvx/config'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { container } from 'tsyringe'
 
-import { setupContainer } from 'container.js'
-import { setupShutdownHandlers } from 'utils/shutdown.utils.js'
+import { setupContainer } from './container.js'
+import { setupShutdownHandlers } from './utils/shutdown.utils.js'
 import { LinkedInMcpServer } from './server.js'
 import { LoggerService } from './services/logger.service.js'
 

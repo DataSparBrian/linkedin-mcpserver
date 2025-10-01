@@ -1,4 +1,4 @@
-import { envSchema } from 'schemas/env.schema.js'
+import { envSchema } from '../schemas/env.schema.js'
 import { inject, injectable } from 'tsyringe'
 import { z } from 'zod'
 import { LoggerService } from '../services/logger.service.js'
@@ -24,12 +24,14 @@ export class AuthConfig {
   private readonly authUrl: string = 'https://www.linkedin.com/oauth/v2'
   private readonly clientId: string
   private readonly clientSecret: string
+  private readonly accessToken: string | undefined
   private readonly configurationValidationSchema = envSchema
 
   constructor(@inject(LoggerService) private readonly logger: LoggerService) {
     const env = this.validateEnvironment()
     this.clientId = env.LINKEDIN_CLIENT_ID
     this.clientSecret = env.LINKEDIN_CLIENT_SECRET
+    this.accessToken = env.LINKEDIN_ACCESS_TOKEN
     this.logger.debug('Authentication configuration loaded successfully')
   }
 
@@ -55,6 +57,14 @@ export class AuthConfig {
    */
   public getAuthUrl(): string {
     return this.authUrl
+  }
+
+  /**
+   * Gets the access token if provided
+   * @returns The LinkedIn API access token
+   */
+  public getAccessToken(): string | undefined {
+    return this.accessToken
   }
 
   /**

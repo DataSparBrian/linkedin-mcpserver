@@ -1,6 +1,6 @@
 import { pino } from 'pino'
 import { injectable, singleton } from 'tsyringe'
-import { ILogger } from 'types/logger.js'
+import { ILogger } from '../types/logger.js'
 
 /**
  * LoggerService - Centralized logging service using Pino
@@ -25,15 +25,20 @@ export class LoggerService implements ILogger {
   private logger: pino.Logger
 
   constructor() {
+    const isProduction = process.env.NODE_ENV === 'production'
+
     this.logger = pino({
-      transport: {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'SYS:standard',
-          ignore: 'pid,hostname'
+      // Use pino-pretty only in development
+      ...(isProduction ? {} : {
+        transport: {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            translateTime: 'SYS:standard',
+            ignore: 'pid,hostname'
+          }
         }
-      },
+      }),
       level: process.env.LOG_LEVEL ?? 'info'
     })
   }

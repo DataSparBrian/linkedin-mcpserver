@@ -45,6 +45,15 @@ export class TokenService {
       this.logger.info('Using existing valid token.')
       return
     }
+
+    // Use provided access token if available
+    const providedToken = this.config.getAccessToken()
+    if (providedToken) {
+      this.accessToken = providedToken
+      this.logger.info('Using provided access token from environment.')
+      return
+    }
+
     await this.fetchToken(this.refreshToken ? 'refresh_token' : 'client_credentials')
   }
 
