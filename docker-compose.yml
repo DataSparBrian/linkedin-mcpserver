@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  linkedin-mcp-server:
+  mcp-linkedin-server:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: linkedin-mcp-server
+    container_name: mcp-linkedin-server
     restart: unless-stopped
     environment:
       - NODE_ENV=production
