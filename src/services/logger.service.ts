@@ -35,12 +35,15 @@ export class LoggerService implements ILogger {
           options: {
             colorize: true,
             translateTime: 'SYS:standard',
-            ignore: 'pid,hostname'
+            ignore: 'pid,hostname',
+            destination: 2 // Write to stderr
           }
         }
       }),
       level: process.env.LOG_LEVEL ?? 'info'
-    })
+    }, 
+    // In production, write to stderr to keep stdout clean for MCP JSON-RPC
+    isProduction ? pino.destination(2) : undefined)
   }
 
   /** @inheritdoc */

@@ -3,11 +3,12 @@
 ## The Problems
 
 1. **Redundant volume mount**: The `.env` file is already copied into the container during build, so mounting it is unnecessary
-2. **stdout pollution**: `dotenvx run` outputs version info to stdout, breaking MCP's JSON-RPC communication
+2. **stdout pollution from dotenvx**: `dotenvx run` outputs version info to stdout, breaking MCP's JSON-RPC communication
+3. **stdout pollution from logger**: Pino logger was writing to stdout instead of stderr, interfering with JSON-RPC protocol
 
 ## The Solution
 
-### Fixed Dockerfile
+### 1. Fixed Dockerfile CMD
 Changed from:
 ```dockerfile
 CMD ["npx", "dotenvx", "run", "--", "node", "build/index.js"]
@@ -19,6 +20,20 @@ CMD ["node", "build/index.js"]
 ```
 
 Since `src/index.ts` already imports `@dotenvx/dotenvx/config`, it will decrypt the `.env` file without polluting stdout.
+
+### 2. Fixed Logger Output
+Modified `src/services/logger.service.ts` to write all logs to stderr instead of stdout:
+- In production: Uses `pino.destination(2)` to write to stderr (file descriptor 2)
+- In development: Configures pino-pretty to write to stderr via `destination: 2`
+
+### 3. Silenced dotenvx Output
+Modified `src/index.ts` to configure dotenvx with the `quiet` option:
+```typescript
+import { config } from '@dotenvx/dotenvx'
+config({ quiet: true })
+```
+
+This prevents dotenvx from printing version info to stdout. Together with the logger fix, stdout is now completely clean for MCP's JSON-RPC communication.
 
 ### Simplified MCP Configuration
 

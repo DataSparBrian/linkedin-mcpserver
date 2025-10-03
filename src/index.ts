@@ -1,6 +1,8 @@
 import 'reflect-metadata'
 // ensure reflect-metadata is loaded before any other imports
-import '@dotenvx/dotenvx/config'
+import { config } from '@dotenvx/dotenvx'
+// Configure dotenvx to be quiet (no stdout output)
+config({ quiet: true })
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { container } from 'tsyringe'
 

@@ -35,6 +35,7 @@ USER nextjs
 # Set up environment variables for production
 ENV NODE_ENV=production
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+ENV DOTENV_CONFIG_QUIET=true
 
 # Default command to run the application
 # Note: @dotenvx/dotenvx/config is imported in src/index.ts, so we don't need dotenvx run wrapper
