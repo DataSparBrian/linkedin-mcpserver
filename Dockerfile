@@ -37,4 +37,6 @@ ENV NODE_ENV=production
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 
 # Default command to run the application
-CMD ["npx", "dotenvx", "run", "--", "node", "build/index.js"]
+# Note: @dotenvx/dotenvx/config is imported in src/index.ts, so we don't need dotenvx run wrapper
+# This keeps stdout clean for MCP JSON-RPC communication
+CMD ["node", "build/index.js"]
