@@ -32,16 +32,9 @@ RUN chown -R nextjs:nodejs /app
 # Switch to non-root user
 USER nextjs
 
-# Expose port (if needed for debugging, but MCP uses stdio)
-EXPOSE 5050
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "console.log('Health check passed')" || exit 1
-
 # Set up environment variables for production
 ENV NODE_ENV=production
-ENV DOTENV_PRIVATE_KEY=""
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 
 # Default command to run the application
 CMD ["npx", "dotenvx", "run", "--", "node", "build/index.js"]

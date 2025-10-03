@@ -56,7 +56,7 @@ The server provides 7 LinkedIn API tools:
 
 ### Prerequisites
 
-- **Docker & Docker Compose** (recommended) OR Node.js 20+
+- **Docker** (recommended) OR Node.js 20+
 - LinkedIn Developer Account with API credentials
 
 ### Method 1: Docker Installation (Recommended)
@@ -72,11 +72,8 @@ cd linkedin-mcp-server
 cp .env.example .env
 # Edit .env with your LinkedIn credentials (see Step 2 below)
 
-# Build and start with Docker Compose
-docker-compose up -d
-
-# Verify it's running
-docker-compose ps
+# Build the Docker image
+docker build -t linkedin-mcp-server .
 ```
 
 ### Method 2: Manual Node.js Installation
@@ -150,16 +147,23 @@ Add the server to your Claude Desktop configuration:
     "linkedin": {
       "command": "docker",
       "args": [
-        "exec",
+        "run",
         "-i",
-        "linkedin-mcp-server",
-        "node",
-        "build/index.js"
+        "--rm",
+        "-e",
+        "DOTENV_PRIVATE_KEY=your_dotenv_private_key_here",
+        "-v",
+        "/absolute/path/to/linkedin-mcp-server/.env:/app/.env:ro",
+        "linkedin-mcp-server"
       ]
     }
   }
 }
 ```
+
+**Important**:
+- Replace `/absolute/path/to/linkedin-mcp-server` with the actual full path to your project directory
+- Replace `your_dotenv_private_key_here` with your actual `DOTENV_PRIVATE_KEY` value (found in your project directory or set during setup)
 
 #### For Manual Node.js Installation:
 
@@ -201,17 +205,11 @@ The AI assistant will automatically use the appropriate LinkedIn tools to fulfil
 ### With Docker
 
 ```bash
-# View logs
-docker-compose logs -f
+# Rebuild Docker image after code changes
+docker build -t linkedin-mcp-server .
 
-# Stop the server
-docker-compose down
-
-# Rebuild after code changes
-docker-compose up -d --build
-
-# Run in development mode (uncomment dev service in docker-compose.yml first)
-# docker-compose up linkedin-mcp-server-dev
+# Test the server with MCP Inspector
+docker run -i --rm -v $(pwd)/.env:/app/.env:ro linkedin-mcp-server
 ```
 
 ### With Node.js
@@ -288,22 +286,23 @@ The server includes automatic token management:
 
 ### Docker Issues
 
-**Container not starting:**
+**Image build fails:**
 ```bash
-# Check container status
-docker-compose ps
+# Check Docker is running
+docker info
 
-# View logs
-docker-compose logs linkedin-mcp-server
+# Verify dependencies are installed
+npm install
 
-# Restart container
-docker-compose restart
+# Rebuild with verbose output
+docker build -t linkedin-mcp-server . --progress=plain
 ```
 
 **Environment variables not loading:**
 1. Verify `.env` file exists and has correct values
 2. Check file permissions: `chmod 644 .env`
-3. Rebuild container: `docker-compose up -d --build`
+3. Verify the volume mount path in `claude_desktop_config.json` is correct
+4. Rebuild the image: `docker build -t linkedin-mcp-server .`
 
 ### Server Not Starting (Manual Installation)
 
@@ -317,16 +316,14 @@ docker-compose restart
 1. Verify your LinkedIn Client ID and Client Secret
 2. Check that your LinkedIn app has required permissions
 3. Ensure the access token (if provided) is valid
-4. Review logs for specific error messages:
-   - Docker: `docker-compose logs linkedin-mcp-server`
-   - Manual: Check console output
+4. Review logs for specific error messages (check Claude Desktop logs)
 
 ### Claude Desktop Not Detecting Server
 
 **For Docker:**
-1. Ensure container is running: `docker-compose ps`
-2. Verify container name is `linkedin-mcp-server`
-3. Test Docker exec access: `docker exec -i linkedin-mcp-server node -e "console.log('test')"`
+1. Verify the Docker image is built: `docker images | grep linkedin-mcp-server`
+2. Test the configuration: `docker run -i --rm -v $(pwd)/.env:/app/.env:ro linkedin-mcp-server`
+3. Check the volume mount path in `claude_desktop_config.json` matches your project directory
 4. Restart Claude Desktop completely
 
 **For Manual Installation:**
